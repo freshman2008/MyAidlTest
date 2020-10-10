@@ -2,13 +2,19 @@ package com.example.myaidlserver.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.example.myaidlserver.IMyAidlCallBack;
 import com.example.myaidlserver.IMyAidlInterface;
+import com.example.myaidlserver.MainActivity;
 
 import androidx.annotation.Nullable;
 
@@ -18,6 +24,7 @@ import androidx.annotation.Nullable;
  */
 public class MyTestService extends Service {
     private final RemoteCallbackList<IMyAidlCallBack> mCallBacks = new RemoteCallbackList<>();
+//    private Handler mHandler = new Handler(getMainLooper());
 
     @Nullable
     @Override
@@ -56,6 +63,15 @@ public class MyTestService extends Service {
                 e.printStackTrace();
             }
             return "hello from server: " + val;
+        }
+
+        @Override
+        public void sendBitmap(Bundle bundle) throws RemoteException {
+            byte[] bis = bundle.getByteArray("bitmap");
+            Bitmap bitmap= BitmapFactory.decodeByteArray(bis, 0, bis.length);
+            ImageView imageView = MainActivity.getImageView();
+            imageView.setImageBitmap(bitmap);
+
         }
 
         @Override

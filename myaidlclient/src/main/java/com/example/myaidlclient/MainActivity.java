@@ -6,6 +6,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -14,6 +19,8 @@ import android.view.View;
 
 import com.example.myaidlserver.IMyAidlCallBack;
 import com.example.myaidlserver.IMyAidlInterface;
+
+import java.io.ByteArrayOutputStream;
 
 public class MainActivity extends AppCompatActivity {
     private Context mContext;
@@ -65,6 +72,27 @@ public class MainActivity extends AppCompatActivity {
         mContext.unbindService(serviceConnection);
         try {
             iMyAidlInterface.unRegisterListener(iMyAidlCallBack);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void btnClick3(View view) {
+        Resources resources = getResources();
+        Bitmap bmp = BitmapFactory.decodeResource(resources, R.drawable.timg);
+//        Drawable drawable = getResources().getDrawable(R.drawable.test0);
+//        BitmapDrawable bd = (BitmapDrawable) drawable;
+//        Bitmap bm= bd.getBitmap();
+
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        //图片格式很重要，可能为jpeg等，不然出现异常
+        byte [] bitmapByte =baos.toByteArray();
+
+        Bundle bundle = new Bundle();
+        bundle.putByteArray("bitmap", bitmapByte);
+        try {
+            iMyAidlInterface.sendBitmap(bundle);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

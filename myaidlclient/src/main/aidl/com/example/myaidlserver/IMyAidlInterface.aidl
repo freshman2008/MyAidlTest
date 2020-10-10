@@ -15,6 +15,7 @@ interface IMyAidlInterface {
 
     oneway void test1();
     String test2(int val);
+    oneway void sendBitmap(in Bundle bundle);
 
     //----添加----//
     void registerListener(IMyAidlCallBack callBack);
