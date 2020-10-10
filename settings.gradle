@@ -1,2 +1,4 @@
 rootProject.name='MyAidlTest'
 include ':app'
+include ':myaidlserver'
+include ':myaidlclient'
