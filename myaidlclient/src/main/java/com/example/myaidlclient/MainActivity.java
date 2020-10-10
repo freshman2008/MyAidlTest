@@ -12,11 +12,14 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 
+import com.example.myaidlserver.IMyAidlCallBack;
 import com.example.myaidlserver.IMyAidlInterface;
 
 public class MainActivity extends AppCompatActivity {
     private Context mContext;
     private IMyAidlInterface iMyAidlInterface;
+    private IMyAidlCallBack iMyAidlCallBack;
+    private ServiceConnection serviceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,18 +34,48 @@ public class MainActivity extends AppCompatActivity {
         intent.setComponent(new ComponentName("com.example.myaidlserver", //参数1：应用的包名
                 "com.example.myaidlserver.service.MyTestService")); //参数2：Service的全路径名(包名+类型)
 
-        mContext.bindService(intent, new ServiceConnection() {
+        serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.v("hello", "onServiceConnected -> ComponentName:" + name);
                 iMyAidlInterface = IMyAidlInterface.Stub.asInterface(service);
+                try {
+                    iMyAidlCallBack = new CallBackBinder();
+                    iMyAidlInterface.registerListener(iMyAidlCallBack);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 Log.v("hello", "onServiceDisconnected -> ComponentName:" + name);
+                try {
+                    iMyAidlInterface.unRegisterListener(iMyAidlCallBack);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
-        }, Context.BIND_AUTO_CREATE);
+        };
+
+        mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    public void btnClick2(View view) {
+        mContext.unbindService(serviceConnection);
+        try {
+            iMyAidlInterface.unRegisterListener(iMyAidlCallBack);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class CallBackBinder extends IMyAidlCallBack.Stub {
+
+        @Override
+        public void callBack(int result) throws RemoteException {
+            Log.v("hello", "IMyAidlCallBack -> callBack: " + result);
+        }
     }
 
     public void btnClick1(View view) {

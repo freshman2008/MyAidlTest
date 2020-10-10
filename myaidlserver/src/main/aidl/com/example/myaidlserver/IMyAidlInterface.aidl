@@ -1,6 +1,8 @@
 // IMyAidlInterface.aidl
 package com.example.myaidlserver;
 
+import com.example.myaidlserver.IMyAidlCallBack;
+
 // Declare any non-default types here with import statements
 
 interface IMyAidlInterface {
@@ -13,4 +15,9 @@ interface IMyAidlInterface {
 
     oneway void test1();
     String test2(int val);
+
+    //----添加----//
+    void registerListener(IMyAidlCallBack callBack);
+    void unRegisterListener(IMyAidlCallBack callBack);
+   //-----------//
 }
