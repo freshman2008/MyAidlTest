@@ -22,13 +22,12 @@ public class MyTestService extends Service {
 
     private class MyBinder extends IMyAidlInterface.Stub {
         @Override
-        public int test1() throws RemoteException {
+        public void test1() throws RemoteException {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            return 100;
         }
 
         @Override

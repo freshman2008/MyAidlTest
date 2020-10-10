@@ -11,6 +11,6 @@ interface IMyAidlInterface {
 //    void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
 //            double aDouble, String aString);
 
-    int test1();
+    oneway void test1();
     String test2(int val);
 }

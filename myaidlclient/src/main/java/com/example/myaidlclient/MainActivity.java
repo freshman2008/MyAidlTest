@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
     public void btnClick1(View view) {
         try {
             Log.v("hello", "before remote call");
-            int i = iMyAidlInterface.test1();
-            Log.v("hello", "test1: " + i);
+            iMyAidlInterface.test1();
+            Log.v("hello", "test1");
 
             String s = iMyAidlInterface.test2(10);
             Log.v("hello", "test2: " + s);
