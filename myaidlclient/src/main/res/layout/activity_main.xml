@@ -27,4 +27,18 @@
         android:layout_height="wrap_content"
         android:onClick="btnClick3"
         android:text="send image" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="btnClick4"
+        android:text="Button" />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="btnClick5"
+        android:text="shared memory" />
 </LinearLayout>

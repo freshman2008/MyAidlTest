@@ -4,9 +4,11 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
@@ -15,6 +17,9 @@ import android.widget.ImageView;
 import com.example.myaidlserver.IMyAidlCallBack;
 import com.example.myaidlserver.IMyAidlInterface;
 import com.example.myaidlserver.MainActivity;
+
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 
 import androidx.annotation.Nullable;
 
@@ -65,13 +70,45 @@ public class MyTestService extends Service {
             return "hello from server: " + val;
         }
 
+
+        class ImageBinder extends Binder {
+            private Bitmap bitmap;
+
+            public ImageBinder(Bitmap bitmap) {
+                this.bitmap = bitmap;
+            }
+
+            Bitmap getBitmap() {
+                return bitmap;
+            }
+        }
+
         @Override
         public void sendBitmap(Bundle bundle) throws RemoteException {
-            byte[] bis = bundle.getByteArray("bitmap");
-            Bitmap bitmap= BitmapFactory.decodeByteArray(bis, 0, bis.length);
+//            byte[] bis = bundle.getByteArray("bitmap");
+//            Bitmap bitmap= BitmapFactory.decodeByteArray(bis, 0, bis.length);
+
+//            ImageBinder imageBinder = (ImageBinder) bundle.getBinder("bitmap");
+//            Bitmap bitmap = imageBinder.getBitmap();
+//            ImageView imageView = MainActivity.getImageView();
+//            imageView.setImageBitmap(bitmap);
+
+
+            //service接收
+            ParcelFileDescriptor parcelable = bundle.getParcelable("client");
+            //获取FD
+            FileDescriptor fd = parcelable.getFileDescriptor();
+            //通过FD获得输入流
+            FileInputStream fileInputStream = new FileInputStream(fd);
+            //转化Bitmap进行展示
+            Bitmap bitmap = inputStream2Bitmap(fileInputStream);
             ImageView imageView = MainActivity.getImageView();
             imageView.setImageBitmap(bitmap);
+        }
 
+        Bitmap inputStream2Bitmap(FileInputStream fileInputStream) {
+            Bitmap bitmap = BitmapFactory.decodeStream(fileInputStream);
+            return bitmap;
         }
 
         @Override

@@ -11,8 +11,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.MemoryFile;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +25,9 @@ import com.example.myaidlserver.IMyAidlCallBack;
 import com.example.myaidlserver.IMyAidlInterface;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.lang.reflect.Method;
 
 public class MainActivity extends AppCompatActivity {
     private Context mContext;
@@ -79,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void btnClick3(View view) {
         Resources resources = getResources();
-        Bitmap bmp = BitmapFactory.decodeResource(resources, R.drawable.timg);
+        Bitmap bmp = BitmapFactory.decodeResource(resources, R.drawable.timg3);
 //        Drawable drawable = getResources().getDrawable(R.drawable.test0);
 //        BitmapDrawable bd = (BitmapDrawable) drawable;
 //        Bitmap bm= bd.getBitmap();
@@ -96,6 +103,60 @@ public class MainActivity extends AppCompatActivity {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public void btnClick4(View view) {
+
+        Resources resources = getResources();
+        Bitmap bmp = BitmapFactory.decodeResource(resources, R.drawable.timg3);
+/*         Bundle bundle = new Bundle();
+       bundle.putBinder("bitmap", new ImageBinder(bmp));
+        try {
+            iMyAidlInterface.sendBitmap(bundle);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }*/
+
+        Intent intent = new Intent(this, TestActivity.class);
+        Bundle bundle = new Bundle();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            bundle.putBinder("bitmap", new ImageBinder(bmp));
+        }
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
+    public void btnClick5(View view) throws IOException {
+        try {
+            //将本地图片转为bitmap
+            Resources resources = getResources();
+            Bitmap bitmap_animal = BitmapFactory.decodeResource(resources, R.drawable.timg3);
+//将图片写入共享内存
+            MemoryFile memoryFile = new MemoryFile("test", bitmap_animal.getByteCount() );
+            memoryFile.getOutputStream().write(bitmap2Bytes(bitmap_animal));
+//获取文件FD
+            Method method = MemoryFile.class.getDeclaredMethod("getFileDescriptor");
+            method.setAccessible(true);
+            FileDescriptor fd = (FileDescriptor) method.invoke(memoryFile);
+//保存FD到这个序列化对象
+            ParcelFileDescriptor descriptor = ParcelFileDescriptor.dup(fd);
+//创建Bundle，传递对象
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("client", descriptor);
+//调用service接口
+//            memoryInterface.shareMemory(bundle);
+            iMyAidlInterface.sendBitmap(bundle);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    byte[] bitmap2Bytes(Bitmap bmp) {
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        //图片格式很重要，可能为jpeg等，不然出现异常
+        byte [] bitmapByte =baos.toByteArray();
+        return  bitmapByte;
     }
 
     private class CallBackBinder extends IMyAidlCallBack.Stub {
