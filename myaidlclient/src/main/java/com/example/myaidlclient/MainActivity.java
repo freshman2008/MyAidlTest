@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.MemoryFile;
 import android.os.Message;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection serviceConnection2;
 
     private Messenger mService;
+    private Messenger mGetReplyMessenger = new Messenger(new MessengerHandler());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,6 +191,8 @@ public class MainActivity extends AppCompatActivity {
         Bundle data = new Bundle();
         data.putString("msg", "Hello,this is Client.");
         msg.setData(data);
+        //TODO 后加入代码  将Messenger对象通过replyTo参数传递给服务端
+        msg.replyTo = mGetReplyMessenger;
         try {
             mService.send(msg);
         } catch (RemoteException e) {
@@ -216,6 +220,17 @@ public class MainActivity extends AppCompatActivity {
             Log.v("hello", "after remote call");
         } catch (RemoteException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static class MessengerHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    Log.e("hello", "recevie msg from Service :" + msg.getData().getString("reply"));
+                    break;
+            }
         }
     }
 }
