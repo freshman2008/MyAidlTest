@@ -16,6 +16,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.MemoryFile;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
@@ -34,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private IMyAidlInterface iMyAidlInterface;
     private IMyAidlCallBack iMyAidlCallBack;
     private ServiceConnection serviceConnection;
+    private ServiceConnection serviceConnection2;
+
+    private Messenger mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,26 @@ public class MainActivity extends AppCompatActivity {
         };
 
         mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+
+        /*----------------------------------------------------------------------------------------*/
+        serviceConnection2 = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mService = new Messenger(service);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
+
+        Intent intent2 = new Intent();
+        intent2.setComponent(new ComponentName("com.example.myaidlserver", //参数1：应用的包名
+                "com.example.myaidlserver.service.MessengerService")); //参数2：Service的全路径名(包名+类型)
+        mContext.bindService(intent2, serviceConnection2, Context.BIND_AUTO_CREATE);
+
     }
 
     public void btnClick2(View view) {
@@ -157,6 +182,18 @@ public class MainActivity extends AppCompatActivity {
         //图片格式很重要，可能为jpeg等，不然出现异常
         byte [] bitmapByte =baos.toByteArray();
         return  bitmapByte;
+    }
+
+    public void btnClick6(View view) {
+        Message msg = Message.obtain(null, 1234);
+        Bundle data = new Bundle();
+        data.putString("msg", "Hello,this is Client.");
+        msg.setData(data);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private class CallBackBinder extends IMyAidlCallBack.Stub {

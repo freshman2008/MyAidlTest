@@ -20,6 +20,10 @@
         <service android:name="com.example.myaidlserver.service.MyTestService"
             android:enabled="true"
             android:exported="true"/>
+
+        <service android:name="com.example.myaidlserver.service.MessengerService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>
